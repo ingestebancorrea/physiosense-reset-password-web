@@ -47,10 +47,10 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.template
-# Sólo se versionan environment.ts (defaults) y las plantillas *.example.ts.
-# Las URLs reales de lab/prod viven en archivos ignorados:
-/src/environments/environment.lab.ts
-/src/environments/environment.production.ts
+# Los API_BASE_URL de lab/prod se versionan: son URLs públicas, no secretos, y el
+# build de CI necesita un valor correcto sin depender de variables de entorno del
+# deploy. Un deploy puede sobreescribirlos con API_BASE_URL[_LAB|_PRODUCTION].
+# Siguen ignorados los overrides locales:
 /src/environments/*.local.ts
 *.local.ts
 *.pem
