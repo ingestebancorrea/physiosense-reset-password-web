@@ -63,8 +63,23 @@ if (created === 0) {
 // `API_BASE_URL` es una constante de compilación: si el bundle se publica con la
 // URL de ejemplo, el frontend queda apuntando a un host inexistente y sólo se
 // descubre en producción. En CI es un error de deploy, no un warning.
-if (process.env.CI || process.env.VERCEL) {
-  const placeholders = targets
+//
+// Se valida sólo el archivo de la configuración que se está compilando: un
+// deploy de lab no necesita conocer la URL de producción. Sin argumento
+// (postinstall) no se valida nada, porque ahí no se sabe qué configuración va a
+// compilarse.
+const requested = process.argv[2];
+const toValidate = requested
+  ? targets.filter(({ target }) => target === `environment.${requested}.ts`)
+  : [];
+
+if (toValidate.length === 0) {
+  if (requested) {
+    console.error(`[setup:env] configuración desconocida: ${requested}`);
+    process.exit(1);
+  }
+} else if (process.env.CI || process.env.VERCEL) {
+  const placeholders = toValidate
     .map(({ target }) => target)
     .filter((target) => {
       const file = join(dir, target);
@@ -80,7 +95,7 @@ if (process.env.CI || process.env.VERCEL) {
       `[setup:env] CI detectado y ${placeholders.join(', ')} todavía tiene una URL de ejemplo.`,
     );
     console.error(
-      `[setup:env] definí API_BASE_URL (o API_BASE_URL_LAB / API_BASE_URL_PRODUCTION) en las variables de entorno del deploy.`,
+      `[setup:env] definí API_BASE_URL o API_BASE_URL_${requested.toUpperCase()} en las variables de entorno del deploy.`,
     );
     process.exit(1);
   }
